@@ -5,6 +5,11 @@ import pkg from "tmi.js";
 const tmi = pkg;
 import { readFile } from "fs/promises";
 import { msg_dispatcher } from "./modules/dispatchers.mjs";
+import { console_call } from "./modules/console_commands.mjs";
+import * as readline from "readline/promises";
+import { stdin, stdout } from "process";
+
+const read = readline.createInterface(stdin, stdout);
 
 const json_promise = readFile("settings.json", {
   encoding: "utf-8",
@@ -27,3 +32,12 @@ client.connect();
 process.tmi_client = client;
 
 client.on("message", msg_dispatcher(client));
+
+while (true) {
+  const input = await read.question(">>>");
+  if (/^\s*\/\w+/.test(input)) {
+    console_call(input);
+  } else {
+    client.say("orthogonality", input);
+  }
+}
