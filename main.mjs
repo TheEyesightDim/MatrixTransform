@@ -8,6 +8,7 @@ import { msg_dispatcher } from "./modules/dispatchers.mjs";
 import { console_call } from "./modules/console_commands.mjs";
 import * as readline from "readline/promises";
 import { stdin, stdout } from "process";
+import Database from "better-sqlite3";
 
 const read = readline.createInterface(stdin, stdout);
 
@@ -24,12 +25,11 @@ const settings_obj = await json_promise
 
 //I just want these things to be available everywhere without passing it around.
 process.settings = settings_obj;
+process.db = new Database(":memory:", { verbose: console.log });
 
 const client = new tmi.Client(settings_obj);
 
 client.connect();
-
-process.tmi_client = client;
 
 client.on("message", msg_dispatcher(client));
 
