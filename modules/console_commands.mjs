@@ -1,6 +1,7 @@
 import { msg_dispatcher } from "./dispatchers.mjs";
 
 function shutdown() {
+  process.db.close();
   process.kill(process.pid, "SIGTERM");
 }
 

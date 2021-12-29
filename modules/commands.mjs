@@ -121,81 +121,77 @@ async function weather(ctx) {
   }
 }
 
-async function set_quote(ctx) {
-  if (!ctx.user.mod || !ctx.user["display-name"] == "Orthogonality") return;
-  const from = "Orthogonality";
-  const quot = ctx.content.trim();
-  const options = {
+async function add_quote(ctx) {
+  //https://regex101.com/r/kyF4kC/1 to match format "[--from:[@]user] quote"
+  const usage = 'Usage: !addquote [--from:[@]username] "quote_string"';
+  const re = /^(?:--from:@?(?<author>\w+)\s+)?(?<quote>".+")$/mu;
+  const matches = ctx.content.match(re);
+  let [author, quote] = matches ? matches.slice(1) : [null, null];
+  author = author
+    ? author
+    : ctx.channel[1].toUpperCase() + ctx.channel.slice(2);
+  const quoted_by = ctx.user["display-name"];
+  const unix_timestamp = Date.now();
+
+  if (!quote) {
+    ctx.client.say(ctx.channel, `@${ctx.user["display-name"]}, ${usage}`);
+    return;
+  }
+
+  const db = process.db;
+  db.prepare(
+    `CREATE TABLE IF NOT EXISTS quotes 
+    (
+      id INTEGER PRIMARY KEY, 
+      author TEXT NOT NULL, 
+      quoted_by TEXT NOT NULL, 
+      quote TEXT NOT NULL, 
+      date INTEGER
+    )`
+  ).run();
+
+  const result = db
+    .prepare(
+      "INSERT INTO quotes (author, quoted_by, quote, date) VALUES (?,?,?,?)"
+    )
+    .run(author, quoted_by, quote, unix_timestamp);
+
+  if (result.changes === 1) {
+    ctx.client.say(
+      ctx.channel,
+      `Quote table updated with quote #${result.lastInsertRowid}.`
+    );
+  } else {
+    ctx.client.say(
+      ctx.channel,
+      `There was some kind of issue inserting the new quote, check the log!`
+    );
+  }
+}
+
+async function get_quote(ctx) {
+  const db = process.db;
+  let max = 0;
+  try {
+    max = db.prepare("SELECT COUNT(id) FROM quotes").pluck().get();
+  } catch (e) {
+    console.log(e);
+    return;
+  }
+  let id = Number.parseInt(ctx.content);
+  id = isNaN(id) ? Math.ceil(Math.random() * max) : id;
+  const row = db
+    .prepare("SELECT author, quoted_by, quote, date FROM quotes WHERE id = ?")
+    .get(id);
+  const date = new Date(row.date).toLocaleDateString("en-US", {
     weekday: "long",
     year: "numeric",
     month: "long",
     day: "numeric",
-  };
-  const datestr = new Date().toLocaleDateString("en-US", options);
-
-  if (quot === "") {
-    /*ctx.client.say(
-      ctx.channel,
-      `@${
-        ctx.user[display - name]
-      }, Usage: !addquote <quote> (no need to add quotation marks)`
-    );*/
-    console.log(
-      `@${
-        ctx.user[display - name]
-      }, Usage: !addquote <quote> (no need to add quotation marks)`
-    );
-    return;
-  }
-
-  new_quote = {
-    author: ctx.user["display-name"],
-    from: from,
-    date: datestr,
-    quote: quot,
-  };
-
-  const json_promise = readFile("quotes.json", {
-    encoding: "utf-8",
-    flag: "r",
   });
-  const q = await json_promise
-    .then((v) => JSON.parse(v))
-    .catch(() => {
-      console.error("Couldn't open quotes.json!");
-      return;
-    });
-
-  q.quotes = [...q.quotes, new_quote];
-
-  const data = JSON.stringify(q);
-  await writeFile("quotes.json", data).catch(() =>
-    console.error("Couldn't save quotes file")
-  );
-  //ctx.client.say(ctx.channel, `Quote saved with index ${q.quotes.length - 1}.`);
-  console.log(`Quote saved with index ${q.quotes.length - 1}.`);
-}
-
-async function get_quote(ctx) {
-  const json_promise = readFile("quotes.json", {
-    encoding: "utf-8",
-    flag: "r",
-  });
-  const q = await json_promise
-    .then((v) => JSON.parse(v))
-    .catch(() => {
-      console.error("Couldn't open quotes.json!");
-      return;
-    });
-
-  let idx = Number.parseInt(ctx.content);
-  idx =
-    idx < q.quotes.length && idx >= 0
-      ? idx
-      : (Math.random() * q.quotes.length) >> 0;
-  const msg = `"${q.quotes[idx].quote}" - ${q.quotes[idx].from}, ${q.quotes[idx].date}`;
-  //ctx.client.say(ctx.channel, msg);
-  console.log(msg);
+  const msg = `Quote #${id}: ${row.quote} from ${row.author}, quoted by @${row.quoted_by} on ${date}`;
+  ctx.client.say(ctx.channel, msg);
+  //console.log(msg);
 }
 
 //This exports chat commands to the dispatcher.
@@ -210,8 +206,8 @@ const commands = {
   "!bs": backseat_policy,
   "!roll": random_roll,
   "!weather": weather,
-  //"!quote": get_quote,
-  //"!addquote": set_quote,
+  "!quote": get_quote,
+  "!addquote": add_quote,
 };
 
 Object.freeze(commands);

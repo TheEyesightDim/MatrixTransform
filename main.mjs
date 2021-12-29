@@ -25,7 +25,7 @@ const settings_obj = await json_promise
 
 //I just want these things to be available everywhere without passing it around.
 process.settings = settings_obj;
-process.db = new Database(":memory:", { verbose: console.log });
+process.db = new Database("res/user.db", { verbose: console.log });
 
 const client = new tmi.Client(settings_obj);
 
