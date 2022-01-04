@@ -9,7 +9,6 @@ import { console_call } from "./modules/console_commands.mjs";
 import * as readline from "readline/promises";
 import { stdin, stdout } from "process";
 import Database from "better-sqlite3";
-import { executionAsyncResource } from "async_hooks";
 
 const read = readline.createInterface(stdin, stdout);
 
@@ -28,6 +27,7 @@ const settings_obj = await json_promise
 process.settings = settings_obj;
 process.db = new Database("res/user.db", { verbose: console.log });
 
+//backup db
 process.db.backup(`res/backup-${Date.now()}.db`)
   .then(() => console.log('Database backup sucessful.'))
   .catch((e) => console.log(`Database backup failed: ${e}`));
