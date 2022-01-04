@@ -149,17 +149,6 @@ async function add_quote(ctx) {
 	}
 
 	const db = process.db;
-	db.prepare(
-		`CREATE TABLE IF NOT EXISTS quotes 
-    (
-      id INTEGER PRIMARY KEY, 
-      author TEXT NOT NULL, 
-      quoted_by TEXT NOT NULL, 
-      quote TEXT NOT NULL, 
-      date INTEGER
-    )`
-	).run();
-
 	const result = db
 		.prepare(
 			"INSERT INTO quotes (author, quoted_by, quote, date) VALUES (?,?,?,?)"
