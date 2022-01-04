@@ -18,7 +18,8 @@ function msg_dispatcher(client_obj) {
 
     if (command) {
       if (command_list.hasOwnProperty(command)) {
-        command_list[command](context);
+        const com = command_list[command];
+        com.fn(context);
       } else {
         client_obj.say(
           ch,

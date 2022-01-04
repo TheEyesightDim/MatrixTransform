@@ -14,8 +14,8 @@ async function dbg(...args) {
   };
   const msg = args.join(" ");
   const is_self = false;
-  const command = args[0];
-  const content = args.slice(1).join(" ");
+  //const command = args[0];
+  //const content = args.slice(1).join(" ");
   const client = {
     say: console.log,
   };

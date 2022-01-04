@@ -11,6 +11,8 @@ function time(ctx) {
 
 function echo(ctx) {
   if (ctx.is_self) return;
+  //log JSON response to help with documentation and debuging
+  console.log(JSON.stringify(ctx.user, null, 4));
   ctx.client.say(ctx.channel, `@${ctx.user["display-name"]} ${ctx.content}`);
 }
 
@@ -109,7 +111,7 @@ async function weather(ctx) {
     const city_name = data.name;
     const desc = data.weather[0].description;
     const temp = data.main.temp;
-    const msg = `Weather in ${city_name}: ${desc}. The current tempurature is ${
+    const msg = `Weather in ${city_name}: ${desc}. The current temperature is ${
       temp >> 0
     }C.`;
     ctx.client.say(ctx.channel, msg);
@@ -198,16 +200,16 @@ async function get_quote(ctx) {
 //The key is the name of the command, and the value is the name of the function.
 //Remember to include the '!'
 const commands = {
-  "!time": time,
-  "!echo": echo,
-  "!eve": parasite_eve,
-  "!wiki": wikipedia,
-  "!help": help,
-  "!bs": backseat_policy,
-  "!roll": random_roll,
-  "!weather": weather,
-  "!quote": get_quote,
-  "!addquote": add_quote,
+  "!time": { fn: time, needs_mod: false },
+  "!echo": { fn: echo, needs_mod: false },
+  "!eve": { fn: parasite_eve, needs_mod: false },
+  "!wiki": { fn: wikipedia, needs_mod: false },
+  "!help": { fn: help, needs_mod: false },
+  "!bs": { fn: backseat_policy, needs_mod: false },
+  "!roll": { fn: random_roll, needs_mod: false },
+  "!weather": { fn: weather, needs_mod: false },
+  "!quote": { fn: get_quote, needs_mod: false },
+  "!addquote": { fn: add_quote, needs_mod: true },
 };
 
 Object.freeze(commands);
