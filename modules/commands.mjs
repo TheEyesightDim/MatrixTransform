@@ -111,9 +111,7 @@ async function weather(ctx) {
     const city_name = data.name;
     const desc = data.weather[0].description;
     const temp = data.main.temp;
-    const msg = `Weather in ${city_name}: ${desc}. The current temperature is ${
-      temp >> 0
-    }C.`;
+    const msg = `Weather in ${city_name}: ${desc}. The current temperature is ${temp >> 0}C.`;
     ctx.client.say(ctx.channel, msg);
   } else {
     ctx.client.say(
