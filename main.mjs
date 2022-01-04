@@ -33,11 +33,14 @@ client.connect();
 
 client.on("message", msg_dispatcher(client));
 
-while (true) {
+while (true)
+{
   const input = await read.question(">>>");
-  if (/^\s*\/\w+/.test(input)) {
+  if (/^\s*\/\w+/.test(input))
+  {
     console_call(input);
-  } else {
+  } else
+  {
     client.say("orthogonality", input);
   }
 }

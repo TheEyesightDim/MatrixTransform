@@ -16,17 +16,21 @@ function msg_dispatcher(client_obj) {
       client: client_obj,
     };
 
-    if (command) {
-      if (command_list.hasOwnProperty(command)) {
+    if (command)
+    {
+      if (command_list.hasOwnProperty(command))
+      {
         const com = command_list[command];
         com.fn(context);
-      } else {
+      } else
+      {
         client_obj.say(
           ch,
           `@ ${user["display-name"]}, ${command} is not a valid command (yet...). Try !help.`
         );
       }
-    } else {
+    } else
+    {
       watcher(context);
     }
   };

@@ -30,9 +30,11 @@ const console_commands = {
 
 export function console_call(input) {
   const list = input.trim().split(/\s/);
-  if (console_commands.hasOwnProperty(list[0])) {
+  if (console_commands.hasOwnProperty(list[0]))
+  {
     console_commands[list[0]](...list.slice(1));
-  } else {
+  } else
+  {
     console.log(`Invalid command "${list[0]}".`);
   }
 }
