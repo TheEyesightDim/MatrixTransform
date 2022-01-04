@@ -1,4 +1,4 @@
 settings.json
 /node_modules
-/res
+/res/*
 start_bot.bat
