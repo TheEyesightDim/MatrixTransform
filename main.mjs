@@ -14,7 +14,6 @@ const read = readline.createInterface(stdin, stdout);
 
 const json_promise = readFile("settings.json", {
   encoding: "utf-8",
-  flag: "r",
 });
 const settings_obj = await json_promise
   .then((v) => JSON.parse(v))
