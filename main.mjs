@@ -9,6 +9,7 @@ import { console_call } from "./modules/console_commands.mjs";
 import * as readline from "readline/promises";
 import { stdin, stdout } from "process";
 import Database from "better-sqlite3";
+import { LocalServer } from "./modules/local_server.mjs";
 
 const read = readline.createInterface(stdin, stdout);
 
@@ -36,6 +37,16 @@ const client = new tmi.Client(settings_obj);
 client.connect();
 
 client.on("message", msg_dispatcher(client));
+
+///test
+const server = new LocalServer();
+server.add_static('static');
+server.add_wss('/socktest', (ws) => {
+  console.log('connected to socktest');
+  ws.send(JSON.stringify({ content: "<p>Connected.</p>" }));
+});
+server.run();
+///endtest
 
 while (true)
 {
