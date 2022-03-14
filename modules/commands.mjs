@@ -197,6 +197,42 @@ async function get_quote(ctx) {
 	//console.log(msg);
 }
 
+async function jisho(ctx) {
+	const input = ctx.content.trim().normalize("NFKC");
+	const usage = `@${ctx.user["display-name"]}, Usage: !jisho <search_term> [num_results] ...The search term should contain no spaces, and the number of results to show is limited to 3.`;
+	const arg_regex = /^(?<term>\S+)(?<count>[\s][123])?$/; //this regexp is only guaranteed to work on input normalized with compatibility decomposition, followed by canonical composition.
+	if (!arg_regex.test(input))
+	{
+		ctx.client.say(ctx.channel, usage);
+		return;
+	}
+	const { term = "", count = "1" } = arg_regex.exec(input).groups;
+	const uri = `https://jisho.org/api/v1/search/words?keyword=${term}`;
+	const response = await fetch(uri);
+
+	if (response.ok)
+	{
+		const { data = [] } = await response.json();
+		if (data.length === 0) 
+		{
+			ctx.client.say(ctx.channel, `No entries found for ${term}, sorry.`);
+			return;
+		}
+		for (const datum of data.slice(0, count)) //count will be coerced to Number type
+		{
+			const entry = datum.japanese[0].word;
+			const reading = datum.japanese[0].reading;
+			const def = datum.senses[0].english_definitions.join(", ");
+			const speech = datum.senses[0].parts_of_speech.join(", ");
+			ctx.client.say(ctx.channel, `Entry: ${entry} | Reading: ${reading} | Definition: ${def} | Part of speech: ${speech}`);
+		}
+	}
+}
+
+async function lurk(ctx) {
+	ctx.client.say(ctx.channel, `Enjoy your lurk! Thanks for stopping by, ${ctx.user["display-name"]}. Much love MeikoLove`);
+}
+
 //This exports chat commands to the dispatcher.
 //The key is the name of the command, and the value is the name of the function.
 //Remember to include the '!'
@@ -211,6 +247,8 @@ const commands = {
 	"!weather": { fn: weather, needs_mod: false },
 	"!quote": { fn: get_quote, needs_mod: false },
 	"!addquote": { fn: add_quote, needs_mod: true },
+	"!jisho": { fn: jisho, needs_mod: false },
+	"!lurk": { fn: lurk, needs_mod: false },
 };
 
 Object.freeze(commands);
