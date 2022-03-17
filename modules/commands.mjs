@@ -220,10 +220,10 @@ async function jisho(ctx) {
 		}
 		for (const datum of data.slice(0, count)) //count will be coerced to Number type
 		{
-			const entry = datum.japanese[0].word;
-			const reading = datum.japanese[0].reading;
-			const def = datum.senses[0].english_definitions.join(", ");
-			const speech = datum.senses[0].parts_of_speech.join(", ");
+			const entry = datum.japanese[0].word || "(kana only)";
+			const reading = datum.japanese[0].reading || "(no reading given)";
+			const def = datum.senses[0].english_definitions.join(", ") || "(no definition given)";
+			const speech = datum.senses[0].parts_of_speech.join(", ") || "(no part of speech given)";
 			ctx.client.say(ctx.channel, `Entry: ${entry} | Reading: ${reading} | Definition: ${def} | Part of speech: ${speech}`);
 		}
 	}
