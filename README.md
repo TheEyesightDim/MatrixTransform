@@ -1,6 +1,6 @@
 # MatrixTransform Twitchbot
 
-NodeJS chat bot for Twitch.
+NodeJS chat bot for Twitch. I really made this for myself, but if it happens to be useful to you, hey, go crazy.
 
 ## Usage
 
