@@ -16,17 +16,23 @@ function msg_dispatcher(client_obj) {
       client: client_obj,
     };
 
+    //console.log(user);
     if (command)
     {
       if (command_list.hasOwnProperty(command))
       {
         const com = command_list[command];
+        if (com.needs_mod && !user.mod && user.badges.broadcaster === undefined)
+        {
+          client_obj.say(ch, `@${user["display-name"]}, you need mod permissions to use that command.`);
+          return;
+        }
         com.fn(context);
       } else
       {
         client_obj.say(
           ch,
-          `@ ${user["display-name"]}, ${command} is not a valid command (yet...). Try !help.`
+          `@${user["display-name"]}, ${command} is not a valid command (yet...). Try !help.`
         );
       }
     } else
