@@ -11,6 +11,7 @@ async function dbg(...args) {
   const channel = "<<Debug>>";
   const user = {
     "display-name": "dbg",
+    "badges": {},
   };
   const msg = args.join(" ");
   const is_self = false;

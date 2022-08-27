@@ -1,6 +1,8 @@
 import fetch from "node-fetch";
 import { readFile, writeFile } from "fs/promises";
 
+import * as util from "./utility.mjs";
+
 //This file implements chat commands.
 
 function time(ctx) {
@@ -16,11 +18,51 @@ function echo(ctx) {
 	ctx.client.say(ctx.channel, `@${ctx.user["display-name"]} ${ctx.content}`);
 }
 
+//
+// SECTION: TEXT ONLY COMMANDS
+//
+function help(ctx) {
+	const pastebin = "https://pastebin.com/DfzD6Lry";
+	const msg = `I'm a new implementation-in-progress, so I don't have a lot of commands yet, sorry to disappoint you. To see a list of what I can do right now, check out this link: ${pastebin}`;
+	ctx.client.say(ctx.channel, msg);
+}
+
+function backseat_policy(ctx) {
+	const msg =
+		"Right now, no backseating or spoilers allowed. Thanks for understanding!";
+	ctx.client.say(ctx.channel, msg);
+}
+
 function parasite_eve(ctx) {
-	let str =
-		"God Jul! To celebrate X-Mas, I'll be playing Parasite Eve for the first time. Please no spoilers or backseating!";
+	const str =
+		`Back in Dec. 2021 I completed Parasite Eve. 
+		Unfortunately, I forgot to save the last broadcast, sorry :(
+		I'd like to return to it sometime to get the extra ending in NG+."`;
 	ctx.client.say(ctx.channel, str);
 }
+
+function persona(ctx) {
+	const str =
+		`I've been playing Persona 1 and 2:EP simultaneously, but very irregularly.
+		There will be more broadcasts of it, sorry for the large gaps.`;
+	ctx.client.say(ctx.channel, str);
+}
+
+function ffx(ctx) {
+	const str =
+		`I'm doing another speedrun of Final Fantasy X to beat my previous time of 9:47.
+		This is the any% PC route, without RNG manipulation, where we give Yuna enough spheres
+		in her grid to have Bahamut beat the game for us. There's also some cutscene and FMV skips.`;
+	ctx.client.say(ctx.channel, str);
+}
+
+function ffx_now_spam(ctx) {
+	const spam = "ＮＯＷ！ ＴＨＩＳ ＩＳ ＩＴ！ ＮＯＷ ＩＳ ＴＨＥ ＴＩＭＥ ＴＯ ＣＨＯＯＳＥ！ ＤＩＥ ＡＮＤ ＢＥ ＦＲＥＥ ＯＦ ＰＡＩＮ ＯＲ ＬＩＶＥ ＡＮＤ ＦＩＧＨＴ ＹＯＵＲ ＳＯＲＲＯＷ！ ＮＯＷ ＩＳ ＴＨＥ ＴＩＭＥ ＴＯ ＳＨＡＰＥ ＹＯＵＲ ＳＴＯＲＩＥＳ！ ＹＯＵＲ ＦＡＴＥ ＩＳ ＩＮ ＹＯＵＲ ＨＡＮＤＳ！";
+	ctx.client.say(ctx.channel, spam);
+}
+//
+// END SECTION
+//
 
 async function wikipedia(ctx) {
 	//https://en.wikipedia.org/api/rest_v1/#/Page%20content/get_page_summary__title_
@@ -37,18 +79,6 @@ async function wikipedia(ctx) {
 		const err_msg = `@${ctx.user["display-name"]}, couldn't find a summary for that on Wikipedia. Double-check your spelling, or try using a synonym.`;
 		ctx.client.say(ctx.channel, err_msg);
 	}
-}
-
-function help(ctx) {
-	const pastebin = "https://pastebin.com/DfzD6Lry";
-	const msg = `I'm a new implementation-in-progress, so I don't have a lot of commands yet, sorry to disappoint you. To see a list of what I can do right now, check out this link: ${pastebin}`;
-	ctx.client.say(ctx.channel, msg);
-}
-
-function backseat_policy(ctx) {
-	const msg =
-		"Right now, no backseating or spoilers allowed. Thanks for understanding!";
-	ctx.client.say(ctx.channel, msg);
 }
 
 function random_roll(ctx) {
@@ -183,6 +213,11 @@ async function get_quote(ctx) {
 	}
 	let id = Number.parseInt(ctx.content);
 	id = isNaN(id) ? Math.ceil(Math.random() * max) : id;
+	if (id > max)
+	{
+		ctx.client.say(ctx.channel, `@${ctx.user['display-name']}, that entry doesn't exist.`);
+		return;
+	}
 	const row = db
 		.prepare("SELECT author, quoted_by, quote, date FROM quotes WHERE id = ?")
 		.get(id);
@@ -233,6 +268,24 @@ async function lurk(ctx) {
 	ctx.client.say(ctx.channel, `Enjoy your lurk! Thanks for stopping by, ${ctx.user["display-name"]}. Much love MeikoLove`);
 }
 
+async function shoutout(ctx) {
+	const username = ctx.content.trim().match(/\w+/i);
+	if (!username)
+	{
+		ctx.client.say(ctx.channel, `${ctx.user["display-name"]}, Usage: !so <username>`);
+		return;
+	}
+
+	const res = await util.get_twitch_user_data(username[0]);
+	if (res)
+	{
+		const { broadcaster_login, broadcaster_name, game_name = "...something?" } = res.data[0];
+		const s = `Let's shower attention on @${broadcaster_name}! Most recently, they were playing ${game_name}. Please check them out and give them a follow if you like <3`;
+		ctx.client.say(ctx.channel, s);
+		ctx.client.say(ctx.channel, `https://www.twitch.tv/${broadcaster_login}`);
+	}
+}
+
 //This exports chat commands to the dispatcher.
 //The key is the name of the command, and the value is the name of the function.
 //Remember to include the '!'
@@ -249,6 +302,11 @@ const commands = {
 	"!addquote": { fn: add_quote, needs_mod: true },
 	"!jisho": { fn: jisho, needs_mod: false },
 	"!lurk": { fn: lurk, needs_mod: false },
+	"!ffx": { fn: ffx, needs_mod: false },
+	"!persona": { fn: persona, needs_mod: false },
+	"!eve": { fn: parasite_eve, needs_mod: false },
+	"!now": { fn: ffx_now_spam, needs_mod: false },
+	"!so": { fn: shoutout, needs_mod: true },
 };
 
 Object.freeze(commands);

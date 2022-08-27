@@ -22,7 +22,7 @@ function msg_dispatcher(client_obj) {
       if (command_list.hasOwnProperty(command))
       {
         const com = command_list[command];
-        if (com.needs_mod && !user.mod && user.badges.broadcaster === undefined)
+        if (com.needs_mod && !user.mod && user.badges?.broadcaster === undefined)
         {
           client_obj.say(ch, `@${user["display-name"]}, you need mod permissions to use that command.`);
           return;

@@ -26,6 +26,10 @@ const settings_obj = await json_promise
 //I just want these things to be available everywhere without passing it around.
 process.settings = settings_obj;
 process.db = new Database("res/user.db", { verbose: console.log });
+process.auth_header = {
+  'Client-Id': settings_obj.options?.clientId,
+  'Authorization': `Bearer ${settings_obj.app_access_token}`
+};
 //This is for session-persistent storage used by commands
 process.globals = {};
 
